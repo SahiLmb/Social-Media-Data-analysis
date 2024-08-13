@@ -26,7 +26,20 @@ if uploaded_file is not None:
     selected_user = st.sidebar.selectbox("Show analysis of:", user_list)
 
     if st.sidebar.button('Analyze the chat'):
+        #Sentiment analysis
+        st.title('Sentiment Analysis based on text')
 
+        positive_percentage, negative_percentage, neutral_percentage, sentiment_emoji = helper.analyze_sentiments(selected_user, df)
+
+        # Create a pie chart
+        labels = ['Positive', 'Negative']
+        sizes = [positive_percentage, negative_percentage]
+        colors = ['green', 'red']
+        plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%', startangle=140)
+        plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+        # Display the pie chart in Streamlit
+        st.pyplot(plt)
     # Stats Area
         num_messages, words, num_media_msgs, num_deleted_msgs, num_links = helper.fetch_stats(selected_user,df)
         st.title("Top Metrics")

@@ -3,6 +3,7 @@ from wordcloud import WordCloud
 import pandas as pd
 from collections import Counter
 import emoji
+from textblob import  TextBlob
 
 extract = URLExtract()
 def fetch_stats(selected_user,df):
@@ -133,6 +134,66 @@ def activity_heatmap(selected_user, df):
     user_heatmap = df.pivot_table(index='day_name', columns='period', values='message', aggfunc='count').fillna(0)
 
     return user_heatmap
+
+# Sentiment analysis
+
+hinglish_to_english = {
+    "badhiya": "good",
+    "bekaar": "bad",
+    "acha": "good",
+    "bura": "bad",
+    "kharab": "bad",
+    "mast": "great",
+    "ghatiya": "terrible",
+    "voh": "good",
+    "kaha": "good",
+    "kya": "good",
+    "lavde": "bad"
+}
+
+# Hinglish translation
+def translate_hinglish_to_english(text):
+    words = text.split()
+    translated_words = [hinglish_to_english.get(word.lower(), word) for word in words]
+    return ' '.join(translated_words)
+def analyze_sentiments(selected_user, df):
+    if selected_user != 'Overall':
+        df = df[df['user'] == selected_user]
+    positive_count = 0
+    negative_count = 0
+    neutral_count = 0
+
+    for message in df['message']:
+        # Translate Hinglish to English
+        translated_message = translate_hinglish_to_english(message)
+
+        # Perform sentiment analysis
+        analysis = TextBlob(translated_message)
+        if analysis.sentiment.polarity > 0:
+            positive_count += 1
+        elif analysis.sentiment.polarity < 0:
+            negative_count += 1
+        else:
+            neutral_count += 1
+
+    total_messages = positive_count + negative_count + neutral_count
+
+    # Calculate percentages
+    positive_percentage = (positive_count / total_messages) * 100 if total_messages else 0
+    negative_percentage = (negative_count / total_messages) * 100 if total_messages else 0
+    neutral_percentage = (neutral_count / total_messages) * 100 if total_messages else 0
+
+
+    # Determine which sentiment is stronger
+    if positive_percentage > negative_percentage:
+        sentiment_emoji = "😊"  # Smiling emoji
+    elif negative_percentage > positive_percentage:
+        sentiment_emoji = "😡"  # Angry emoji
+    else:
+        sentiment_emoji = "😐"  # Neutral emoji
+
+    return positive_percentage, negative_percentage, neutral_percentage, sentiment_emoji
+
     # brute approach
     #  to get total no. of messages
     # if selected_user == 'Overall':
