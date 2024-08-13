@@ -1,7 +1,3 @@
-Here's a sample README file for your WhatsApp Chat Analyzer project:
-
----
-
 # WhatsApp Chat Analyzer
 
 ## Overview
